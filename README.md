@@ -1,107 +1,144 @@
 # LandChain Secure
 
-Blockchain-based land registry system with cryptographic security.
-PKI digital identity, AES-256-GCM encryption, multi-signature transfers, SHA-256 blockchain.
+**Blockchain-Based Land Registry System with Cryptographic Security**
+
+> PKI digital identity · AES-256-GCM encryption · Multi-signature transfers · SHA-256 blockchain · TOTP MFA
 
 ---
 
-## Run Locally
+## Live Demo
 
-1. Install Node.js 18+ from https://nodejs.org
-2. Open terminal in this folder
-3. Run: `node server.js`
-4. Open: http://localhost:3000
-
-The registrar setup code is printed in the terminal on first run.
+**https://landchain-secure.onrender.com**
 
 ---
 
-## Deploy to Render (Free)
+## Quick Start (Run Locally)
 
-### Step 1 — Push to GitHub
-1. Create a new repo on https://github.com (make it public or private)
-2. Open terminal in the `landchain-app` folder and run:
-
-```
-git init
-git add .
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-git push -u origin main
+```bash
+# No npm install needed — zero external dependencies
+node server.js
 ```
 
-### Step 2 — Create a Render account
-- Go to https://render.com and sign up (free)
-- Connect your GitHub account
+Open **http://localhost:3000**
 
-### Step 3 — Create a new Web Service
-- Click **New** → **Web Service**
-- Select your GitHub repo
-- Render will auto-detect `render.yaml`
+The registrar setup code prints in the terminal on first run.
 
-If it does not auto-detect, set manually:
-- **Build Command:** `echo done`
-- **Start Command:** `node server.js`
-- **Environment:** Node
-
-### Step 4 — Add a Disk (important — keeps data between restarts)
-- In your Render service → **Disks** tab
-- Add disk:
-  - Name: `landchain-data`
-  - Mount path: `/var/data`
-  - Size: 1 GB (free tier)
-
-### Step 5 — Set Environment Variables
-In Render service → **Environment** tab, add:
-
-| Key | Value |
-|-----|-------|
-| `NODE_ENV` | `production` |
-| `DATA_DIR` | `/var/data` |
-| `INSPECTOR_CODE` | (any secret code you choose, e.g. `myinspector123`) |
-
-### Step 6 — Deploy
-- Click **Deploy**
-- Wait ~2 minutes
-- Your app will be live at: `https://landchain-secure.onrender.com` (or similar)
-
-### Step 7 — Get the registrar setup code
-- In Render → **Logs** tab
-- Look for: `Registrar setup code: xxxxxxxx`
-- OR use the `INSPECTOR_CODE` env variable you set — that becomes the code
+> Requires Node.js 18+
 
 ---
 
-## How It Works
+## How to Use
 
-| Role | What they do |
+| Step | Who | What |
+|------|-----|------|
+| 1 | Land Inspector | Register with setup code from server log |
+| 2 | Seller | Register → Inspector approves KYC |
+| 3 | Buyer | Register → Inspector approves KYC |
+| 4 | Seller | List land with encrypted documents |
+| 5 | Land Inspector | Verify the listed land |
+| 6 | Buyer | Request to buy from marketplace |
+| 7 | Seller | Approve request + share document key |
+| 8 | Buyer | Decrypt documents → Pay (simulated) |
+| 9 | All 3 | Sign transfer (multi-signature) |
+| 10 | Land Inspector | Commit transfer to blockchain |
+| 11 | Anyone | Audit blockchain — all blocks verified |
+
+---
+
+## Roles
+
+| Role | Permissions |
 |------|-------------|
-| Land Inspector | Government registrar — approves users, verifies lands, commits transfers |
-| Seller | Registers land, approves buyer requests, signs transfers |
-| Buyer | Browses marketplace, requests to buy, pays, signs transfers |
-
-### Full flow
-1. Inspector registers first (needs setup code from server log)
-2. Seller registers → Inspector approves KYC
-3. Buyer registers → Inspector approves KYC
-4. Seller lists land with documents (encrypted in browser)
-5. Inspector verifies the land
-6. Buyer requests to buy
-7. Seller approves and shares document key with buyer
-8. Buyer reviews documents and pays
-9. All 3 sign the transfer (multi-signature)
-10. Inspector commits transfer to blockchain
-11. Ownership permanently recorded — auditable by anyone
+| **Land Inspector** | Approve/reject users, verify lands, sign transfers, commit to blockchain |
+| **Seller** | List lands, approve buyer requests, sign ownership transfers |
+| **Buyer** | Browse marketplace, request purchase, decrypt documents, pay, sign transfer |
 
 ---
 
 ## Security Features
 
-- AES-256-GCM: KYC and documents encrypted in browser before upload
-- PKI: ECDSA P-256 digital identity, CA-issued certificates
-- Multi-signature: 3-of-3 approval for every ownership transfer
-- TOTP MFA: 6-digit authenticator code required at every login
-- SHA-256 blockchain: tamper-evident hash chain with Merkle roots
-- RBAC: role-based access control enforced on every API call
-- scrypt password hashing + account lockout after 5 failed attempts
+| Feature | Implementation |
+|---------|---------------|
+| AES-256-GCM | KYC and documents encrypted in browser — server never sees plaintext |
+| PKI Certificates | ECDSA P-256 — Government CA issues certificates to all verified users |
+| Multi-Signature | 3-of-3 approval required — Buyer + Seller + Inspector must all sign |
+| TOTP MFA | 6-digit code from Google/Microsoft Authenticator required at every login |
+| SHA-256 Blockchain | Tamper-evident hash chain with Merkle roots and BFT 3-of-4 consensus |
+| scrypt Hashing | Password hashed with N=16384 — brute-force resistant |
+| RBAC | Role-based access control enforced on every API call |
+| Rate Limiting | Account locks after 5 failed login attempts |
+
+---
+
+## Project Structure
+
+```
+landchain-app/
+├── server.js          # Main server — API, blockchain, PKI CA
+├── lib/
+│   ├── auth.js        # scrypt password hashing + TOTP
+│   └── chain.js       # SHA-256 blockchain, BFT consensus, Merkle tree, audit
+├── public/
+│   ├── index.html     # Single page app entry point
+│   ├── css/style.css  # Styles
+│   └── js/
+│       ├── crypto.js  # Browser crypto — AES-256-GCM, ECDSA, RSA-OAEP, TOTP
+│       ├── client.js  # API client, wallet management, transaction signing
+│       └── app.js     # UI — role-based dashboards, blockchain explorer
+├── package.json       # Node config — start: node server.js
+└── render.yaml        # Render.com deployment config
+```
+
+---
+
+## Deploy on Render (Free)
+
+### 1. Push to GitHub
+```bash
+git init
+git add .
+git commit -m "initial commit"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/landchain-secure.git
+git push -u origin main
+```
+
+### 2. Create Web Service on Render
+- Go to [render.com](https://render.com) → New → Web Service
+- Connect your GitHub repo
+- `render.yaml` is auto-detected — no manual config needed
+
+### 3. Add Persistent Disk
+- Render Service → Disks → Add Disk
+- Name: `landchain-data`, Mount path: `/var/data`, Size: `1 GB`
+
+### 4. Environment Variables (optional)
+| Key | Value |
+|-----|-------|
+| `NODE_ENV` | `production` |
+| `DATA_DIR` | `/var/data` |
+| `INSPECTOR_CODE` | `your-chosen-setup-code` |
+
+### 5. Get Setup Code
+After deploy → **Logs** tab → look for:
+```
+Registrar setup code: xxxxxxxxxxxxxxxx
+```
+Use this code when registering as Land Inspector.
+
+---
+
+## Tech Stack
+
+- **Backend** — Node.js (zero npm dependencies, built-in modules only)
+- **Frontend** — Vanilla JS + React-style rendering (no build step)
+- **Crypto** — Browser WebCrypto API + Node.js `crypto` module
+- **Blockchain** — Custom SHA-256 hash chain with BFT 3-of-4 consensus
+- **Storage** — JSON file on persistent disk (swap to PostgreSQL for production)
+- **Hosting** — Render.com free tier
+
+---
+
+## GitHub
+
+[github.com/TanujaPammina/landchain-secure](https://github.com/TanujaPammina/landchain-secure)
