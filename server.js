@@ -50,7 +50,7 @@ function inspectorOnly(req, res) { if (!authed(req, res)) return false; if (req.
 const validBlob = b => b && /^[0-9a-f]+$/.test(b.iv || '') && /^[0-9a-f]+$/.test(b.ct || '');
 
 route('GET', '/api/meta', (req, res) => { const i = state.inspector && state.users[state.inspector];
-  send(res, 200, { ca: { addr: ca.addr, pub: ca.pub, name: ca.name }, inspector: i ? { addr: i.addr, name: i.name, wrapPub: i.wrapPub } : null, inspectorExists: !!state.inspector, validators: ch.VALIDATORS, height: db.chain.length, nextLand: state.nextLand }); });
+  send(res, 200, { ca: { addr: ca.addr, pub: ca.pub, name: ca.name }, inspector: i ? { addr: i.addr, name: i.name, wrapPub: i.wrapPub } : null, inspectorExists: !!state.inspector, setupCode: state.inspector ? null : db.setupCode, validators: ch.VALIDATORS, height: db.chain.length, nextLand: state.nextLand }); });
 
 route('POST', '/api/register', (req, res) => {
   if (!au.rateLimit('reg:' + ip(req), 10, 60000)) return fail(res, 'too many attempts', 429);

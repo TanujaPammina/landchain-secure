@@ -1,6 +1,6 @@
 /* LandChain Secure – browser UI. All secrets (private keys, document keys) stay in this browser. */
 const cl = LC.make({ fetch: (...a) => fetch(...a), storage: window.localStorage });
-const U = { tab: 'market', busy: false, authTab: 'login', st: null, dir: [], pend: [], audit: null, chain: null, modal: null, reg: null, inspectorExists: false };
+const U = { tab: 'market', busy: false, authTab: 'login', st: null, dir: [], pend: [], audit: null, chain: null, modal: null, reg: null, inspectorExists: false, setupCode: '' };
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const inr = n => '₹ ' + Number(n).toLocaleString('en-IN');
@@ -64,12 +64,12 @@ function authView() {
         <button class="ghost" data-act="authtab" data-k="login">Login</button>
         <button data-act="authtab" data-k="register">Register</button>
       </div>
-      ${!U.inspectorExists ? `<div class="banner a small"><b>First time setup:</b> No Land Inspector registered yet. If you are the government registrar, select the Land Inspector role below and enter the setup code from the server terminal.</div>` : ''}
+      ${!U.inspectorExists ? `<div class="banner a small"><b>First time setup:</b> No Land Inspector registered yet. Select the <b>Land Inspector</b> role below — the setup code is filled in automatically for you.</div>` : ''}
       <div class="banner g small">
         <b>Which role should I choose?</b><br>
         <b>Seller</b> — I own land and want to register or sell it.<br>
         <b>Buyer</b> — I want to search and purchase land.
-        ${!U.inspectorExists ? '<br><b>Land Inspector</b> — I am the government registrar.' : ''}
+        ${!U.inspectorExists ? '<br><b>Land Inspector</b> — I am the government registrar (admin).' : ''}
       </div>
       <label>Username (a-z 0-9 _ only)</label>
       <input id="r_user" autocomplete="username">
@@ -104,8 +104,9 @@ function authView() {
       <label>Address</label>
       <input id="r_addr">
       <div id="r_setup" style="display:none">
-        <label>Registrar setup code (from server terminal)</label>
-        <input id="r_code" placeholder="paste the code from terminal">
+        <label>Registrar setup code</label>
+        <input id="r_code" placeholder="auto-filled" value="${U.setupCode || ''}">
+        <p class="small mut">This code is automatically filled from the server. Do not share it.</p>
       </div>
       <p class="small mut">Your KYC is <b>encrypted in your browser (AES-256-GCM)</b> before being sent. The server never sees your Aadhaar or PAN in plain text.</p>
       <button data-act="register">Create account</button>
@@ -460,5 +461,5 @@ document.addEventListener('change', e => {
 });
 
 /* load meta on startup */
-fetch('/api/meta').then(r => r.json()).then(m => { U.inspectorExists = !!m.inspectorExists; render(); }).catch(() => {});
+fetch('/api/meta').then(r => r.json()).then(m => { U.inspectorExists = !!m.inspectorExists; U.setupCode = m.setupCode || ''; render(); }).catch(() => {});
 render();
