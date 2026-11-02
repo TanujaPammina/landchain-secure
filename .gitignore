@@ -1,0 +1,10 @@
+data/
+*.tmp
+.env
+node_modules/
+*.zip
+*.pdf
+*.docx
+*.doc
+*.rar
+*.7z

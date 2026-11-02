@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: landchain-secure
+    runtime: node
+    buildCommand: echo "no build step"
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /var/data
+      - key: INSPECTOR_CODE
+        generateValue: true
+    disk:
+      name: landchain-data
+      mountPath: /var/data
+      sizeGB: 1
